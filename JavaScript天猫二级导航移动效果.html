@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style type="text/css">
+        .title {
+            display: inline-block;
+            padding: 5px 6px;
+            background-color: #873adc;
+            color: #ffffff;
+            font-size: 18px;
+            letter-spacing: 1px;width: 200px;
+        }
+
+        .block {
+            padding: 5px 10px;
+        }
+
+        .first-nav {
+            float: left;
+            background-color: #333333;
+            opacity: 0.7;
+            color: #ffffff;
+        }
+
+        .second-nav {
+            display: none;
+            width: 520px;
+            border: 1px solid orangered;
+            padding: 10px;
+        }
+
+        .second-nav .block {
+            display: none;
+
+        }
+        .second-nav .section{
+            width: 240px;
+            float: left;
+            margin: 0 5px;
+        }
+
+        .topic {
+            font-size: 18px;
+            text-align: center;
+        }
+
+        .list {
+            padding: 5px 10px;
+        }
+
+        .list a {
+            text-decoration: none;color: #ffffff;font-size: 12px;
+        }
+
+        .list a:after {
+            content: '/';
+            padding: 0 5px;
+        }
+
+        .list a:last-child:after {
+            content: '';
+        }
+
+        .section {
+            display: inline-block;
+        }
+
+        .section ul {
+            list-style: none;
+            padding: 0;font-size: 12px;
+        }
+
+        .section li {
+            display: inline-block;
+            padding-left: 0;
+            padding-right: 5px;
+            word-wrap: break-word;
+            padding-bottom: 10px;
+        }
+
+        .section li:after {
+            content: '|';
+            padding-left:5px;
+            color: #dddddd;
+        }
+
+        .section li:last-child:after {
+            content: '';
+        }
+
+        .subTitle {
+            padding-bottom: 5px;
+            font-weight: bold;
+            border-bottom: 1px solid #333333;
+        }
+    </style>
+</head>
+<body>
+<div class="title">所有分类</div>
+<div class="container">
+    <div class="first-nav">
+        <div class="block">
+            <div class="topic">首页</div>
+            <div class="listContainer">
+                <div class="list">
+                    <a href="">asdfkl</a>
+
+                    <a href="">dfhajk</a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div class="second-nav">
+        <div class="block">
+            <div class="section">
+                <div class="subTitle">手机</div>
+                <ul>
+                    <li class="sublist"><a href="#">大锅饭</a></li>
+                    <li class="sublist"><a href="#">非得</a></li>
+                    <li class="sublist"><a href="#">发</a></li>
+                </ul>
+            </div>
+            <div class="section">
+                <div class="subTitle">手机</div>
+                <ul>
+                    <li class="sublist"><a href="#">大锅饭</a></li>
+                    <li class="sublist"><a href="#">非得</a></li>
+                    <li class="sublist"><a href="#">发</a></li>
+                </ul>
+            </div>
+            <div class="section">
+                <div class="subTitle">手机</div>
+                <ul>
+                    <li class="sublist"><a href="#">大锅饭</a></li>
+                    <li class="sublist"><a href="#">非得</a></li>
+                    <li class="sublist"><a href="#">发</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var dataObj;
+    var xmlhttp = null;
+    var flag = 0;//定义当前状态,0:列表外,1:列表内
+    try {
+        xmlhttp = new XMLHttpRequest();
+    } catch (e) {
+        try {
+            xmlhttp = new ActiveXObject('Microsoft.XMLHTTP');
+        } catch (e) {
+            alert('Your browser is not support XMLHTTP');
+        }
+    }
+
+    //xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+    xmlhttp.open('GET', 'shop_data.json', true);
+    xmlhttp.onreadystatechange = function () {
+        if (xmlhttp.status === 200 && xmlhttp.readyState === 4) {
+            dataObj = JSON.parse(xmlhttp.responseText);
+            var html = '';//
+            var subHtml = '';
+            for (var i = 0; i < dataObj.length; i++) {
+                var list = '';
+                for (var j = 0; j < dataObj[i]['sort'].length; j++) {
+                    var listObj = dataObj[i]['sort'];
+                    list += "<a href='" + listObj[j]['sortUrl'] + "'>" + listObj[j]['name'] + "</a>";
+
+                }
+                html += "<div class='block'><div class='topic'>" + dataObj[i]['sortName'] + "</div><div class='listContainer'><div class='list'>" + list + "</div></div></div>"
+                subHtml += getSubSort(i);
+            }
+            document.getElementsByClassName('first-nav')[0].innerHTML = html;
+            document.getElementsByClassName('second-nav')[0].innerHTML = subHtml;
+            defineStatus();
+        }
+    };
+
+    xmlhttp.send(null);
+
+
+    function getSubSort(index) {
+        var html = '';var result ='';
+        for (var k = 0; k < dataObj[index]["subSort"].length; k++) {//子分类
+            var subName = dataObj[index]["subSort"][k]["subName"];//子分类标题
+            var subTitleHtml = '<div class="subTitle">' + subName + '</div>';
+            var subContentHtml = '';
+            var subContent = dataObj[index]["subSort"][k]["subContent"];
+            for (var h = 0; h < subContent.length; h++) {
+                var subList = subContent[h];
+                subContentHtml += '<li class="sublist"><a href="' + subList['url'] + '">' + subList['name'] + '</a></li>';//子分类内容
+            }
+            html += '<div class="section">' + subTitleHtml + '<ul>' + subContentHtml + '</ul></div>';
+
+        }
+
+        result = '<div class="block">' + html + '</div>';
+        return result;
+    }
+
+    function defineStatus() {
+        var start = document.getElementsByClassName('title')[0];
+        var first_nav = document.getElementsByClassName('first-nav')[0];
+        var first_block = first_nav.getElementsByClassName('block');
+        var second_nav = document.getElementsByClassName('second-nav')[0];
+        var second_block = second_nav.getElementsByClassName('block');
+        var length = first_block.length;
+
+        for (var i = 0; i < length; i++) {
+            let index = i;//每个闭包都绑定了块作用域的变量
+            first_block[i].addEventListener('mouseenter', function () {
+                //alert('hdjkfak');
+                flag = 1;
+                second_nav.style.display = 'inline-block';
+                second_block[index].style.display = 'inline-block';
+                hhh(index, length, second_block);
+                second_nav.addEventListener('mouseenter', function () {
+                    flag = 1;
+                }, false);
+
+            }, false);
+        }
+
+        start.addEventListener('mouseleave', setFlag, false);
+        first_nav.addEventListener('mouseleave', setFlag, false);
+        second_nav.addEventListener('mouseleave', setFlag, false);
+
+    }
+
+    function hhh(index, length, objArr) {//循环子目录，隐藏不是当前div的元素
+        for (var i = 0; i < length; i++) {
+            if (i !== index) {
+                objArr[i].style.display = 'none';
+            }
+        }
+    }
+
+    function setFlag() {
+        var second_nav = document.getElementsByClassName('second-nav')[0];
+        flag = 0;
+        setInterval(function () {
+            if (flag === 0) {
+                second_nav.style.display = 'none';
+            }
+        }, 1500);
+    }
+</script>
+</body>
+</html>
